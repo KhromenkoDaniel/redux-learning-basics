@@ -1,59 +1,66 @@
 import './App.css';
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
+import {addCustomerAction, addManyCustomersAction, removeCustomerAction} from "./store/customerReducer";
+import {addCashAction, getCashAction} from "./store/cashReducer";
+import {fetchCustomers} from "./AsyncActions/customers";
 
 function App() {
-  const dispatch = useDispatch();
+    const deletedComponentRef = React.useRef(null);
+    // React.useEffect(() => {
+    //     window.scrollTo(0, 0);
+    // }, []);
+
+    // const [visibleUsersList, setVisibleUsersList] = React.useState(false);
+    const dispatch = useDispatch();
     const cash = useSelector(state => state.cash.cash);
     const customers = useSelector(state => state.customers.customers);
 
     const addCash = (cash) => {
-        dispatch({type: 'ADD_CASH', payload: cash})
+        dispatch(addCashAction(cash))
     }
+
     const getCash = (cash) => {
-        dispatch({type: 'GET_CASH', payload: cash})
+        dispatch(getCashAction(cash))
     }
+
     const addCustomer = (name) => {
         const customer = {
             name,
             id: Date.now()
         }
-        dispatch({type: 'ADD_CUSTOMER', payload: customer})
+        dispatch(addCustomerAction(customer.id))
     }
-    const removeCustomer = (customer) => {
-        dispatch({type: 'REMOVE_CUSTOMER', payload: customer})
+
+    const removeCustomer = (customers) => {
+         dispatch(removeCustomerAction(customers))
+        window.scrollTo(0, deletedComponentRef.current.offsetTop);
     }
+
   return (
       <div className="App">
+          <div className="menu">
         <div className="balance">Баланс: {cash} BTC</div>
         <div className="App-buttons">
-            <button onClick={()=>addCash(Number(prompt()))} >Поповнити баланс</button>
-            <button onClick={()=>getCash(Number(prompt()))} >Зняти з баланса</button>
-            <button onClick={()=>addCustomer(prompt())} >Додати клієнта</button>
-            <button onClick={()=>removeCustomer(prompt())} >Видалити клієнта</button>
+            <div className="App-buttons__cash">
+            <button onClick={()=>addCash(Number(prompt()))}>Поповнити баланс</button>
+            <button onClick={()=>getCash(Number(prompt()))}>Зняти з баланса</button>
+            </div>
+            <div className="App-buttons__customers">
+            <button onClick={()=>addCustomer(prompt())}>Додати клієнта</button>
+            <button onClick={()=>dispatch(fetchCustomers())}>Список клієнтів</button>
+            </div>
         </div>
+          </div>
           {
               customers.length > 0 ?
-                  <div>
+                  <div className="customers-list">
                       {
-                            customers.map((customer,index) => {
+                          customers.map((customer) => {
                                 return (
-                                    <div style={{
-                                        backgroundColor: "#405cf5",
-                                        borderRadius: "6px",
-                                        borderWidth: "0",
-                                        color:"#fff",
-                                        cursor: "pointer",
-                                        fontFamily: "Roboto,Ubuntu,sans-serif",
-                                        fontSize: "25px",
-                                        fontWeight: "600",
-                                        height:"auto",
-                                        margin:"12px",
-                                        padding: "1px 1px",
-                                        textAlign: "center",
-                                        whiteSpace:"nowrap",
-                                        width:"300px"
-                                    }} key={index}>
+                                    <div className="user"
+                                         onClick={()=>removeCustomer(customer.id)}
+                                         key={customer.id}>
                                         <p>{customer.name}</p>
                                     </div>
                                 )
